@@ -1,7 +1,7 @@
 ---
 title: 'The Power of Words: How Your Coworkers Perceive Your Spouse'
-# description: 'Lorem ipsum dolor sit amet'
-# pubDate: 'Jul 08 2022'
+description: 'Lorem ipsum dolor sit amet'
+pubDate: '10/6/2023'
 # heroImage: '/blog-placeholder-3.jpg'
 ---
 
