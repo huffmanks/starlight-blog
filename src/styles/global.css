@@ -66,3 +66,8 @@ body {
 * {
   border-color: hsl(var(--border));
 }
+
+.prose li:has(> div.expressive-code) {
+  list-style-type: none;
+  margin-left: -20px;
+}
