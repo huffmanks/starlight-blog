@@ -3,7 +3,7 @@ import BaseHead from "../components/BaseHead.astro";
 import Header from "../components/Header.astro";
 import Footer from "../components/Footer.astro";
 
-const { title, description } = Astro.props;
+const { title, description, heading } = Astro.props;
 ---
 
 <!doctype html>
@@ -14,9 +14,13 @@ const { title, description } = Astro.props;
     <body>
         <div class="flex min-h-screen flex-col">
             <Header />
-            <main class="mx-auto max-w-2xl flex-1 p-4">
-                <slot />
-            </main>
+            <div class="flex-1 p-8">
+                <main class="mx-auto max-w-4xl pb-4">
+                    <h1 class="mb-8 text-3xl underline decoration-primary underline-offset-4">{heading}</h1>
+
+                    <slot />
+                </main>
+            </div>
             <Footer />
         </div>
     </body>

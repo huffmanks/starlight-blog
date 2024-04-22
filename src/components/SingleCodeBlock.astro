@@ -1,0 +1,12 @@
+---
+import { Code } from "astro-expressive-code/components";
+
+interface Props {
+    code: string;
+    lang?: string;
+}
+
+const { code, lang = "shell" } = Astro.props;
+---
+
+<Code code={code} lang={lang} showLineNumbers={false} frame="none" />

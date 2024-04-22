@@ -2,16 +2,16 @@
 title: "Setting up NFS and Rsync with Linux machines"
 description: "This setup allows bidirectional synchronization between the source HDD and multiple destination HDDs using NFS for network file sharing and rsync for efficient data transfer."
 pubDate: "4/20/2024"
-heroImage: "/blog-placeholder-3.jpg"
+heroImage: "/blog-placeholder-2.jpg"
 ---
+
+import SingleCodeBlock from "../../components/SingleCodeBlock.astro";
 
 1. Set Up NFS:
 
 - Install NFS server on the machine where the source HDD is located:
 
-```shell
-sudo apt install nfs-kernel-server
-```
+<SingleCodeBlock code="sudo apt install nfs-kernel-server" />
 
 - Edit the /etc/exports file to specify directories to be exported:
 

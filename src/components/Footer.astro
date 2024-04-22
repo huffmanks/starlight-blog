@@ -4,7 +4,9 @@ import SocialLinks from "./SocialLinks.astro";
 const today = new Date();
 ---
 
-<footer class="flex w-full items-center justify-center gap-8 bg-primary p-8">
-    <span>&copy; {today.getFullYear()} Kevin. All rights reserved.</span>
-    <SocialLinks isFooter />
+<footer class="w-full bg-primary px-8 py-5">
+    <div class="mx-auto flex max-w-4xl items-center justify-center gap-8">
+        <span>&copy; {today.getFullYear()} Kevin. All rights reserved.</span>
+        <SocialLinks isFooter />
+    </div>
 </footer>

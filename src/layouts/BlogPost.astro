@@ -3,33 +3,31 @@ import type { CollectionEntry } from "astro:content";
 
 import FormattedDate from "../components/FormattedDate.astro";
 import BaseLayout from "./BaseLayout.astro";
+import ProseWrapper from "../components/ProseWrapper.astro";
 
 type Props = CollectionEntry<"blog">["data"];
 
 const { title, description, pubDate, updatedDate, heroImage } = Astro.props;
 ---
 
-<BaseLayout title={title} description={description}>
+<BaseLayout title={title} description={description} heading={title}>
     <article>
-        <div>
-            {heroImage && <img width={1020} height={510} src={heroImage} alt="" />}
+        <div class="mb-4">
+            {heroImage && <img class="rounded-md object-cover shadow-sm" width={900} height={450} src={heroImage} alt="" />}
         </div>
-        <div>
-            <div>
-                <div>
-                    <FormattedDate date={pubDate} />
-                    {
-                        updatedDate && (
-                            <div>
-                                Last updated on <FormattedDate date={updatedDate} />
-                            </div>
-                        )
-                    }
-                </div>
-                <h1>{title}</h1>
-                <hr />
-            </div>
+        <div class="mx-4 mb-6 border-l-2 border-primary pl-4">{description}</div>
+        <div class="mb-8 text-muted-foreground">
+            <FormattedDate date={pubDate} />
+            {
+                updatedDate && (
+                    <div>
+                        Last updated on <FormattedDate date={updatedDate} />
+                    </div>
+                )
+            }
+        </div>
+        <ProseWrapper>
             <slot />
-        </div>
+        </ProseWrapper>
     </article>
 </BaseLayout>

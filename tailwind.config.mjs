@@ -11,6 +11,16 @@ export default {
       },
     },
     extend: {
+      typography: ({ theme }) => ({
+        DEFAULT: {
+          css: {
+            width: "100%",
+            maxWidth: "896px",
+            padding: 0,
+            color: "hsl(var(--foreground))",
+          },
+        },
+      }),
       colors: {
         border: "hsl(var(--border))",
         input: "hsl(var(--input))",
@@ -40,5 +50,5 @@ export default {
       },
     },
   },
-  plugins: [],
+  plugins: [require("@tailwindcss/typography")],
 };
