@@ -1,37 +1,37 @@
 ---
-title: 'Setting up NFS and Rsync with Linux machines'
-description: 'This setup allows bidirectional synchronization between the source HDD and multiple destination HDDs using NFS for network file sharing and rsync for efficient data transfer.'
-pubDate: '4/20/2024'
-heroImage: '/blog-placeholder-3.jpg'
+title: "Setting up NFS and Rsync with Linux machines"
+description: "This setup allows bidirectional synchronization between the source HDD and multiple destination HDDs using NFS for network file sharing and rsync for efficient data transfer."
+pubDate: "4/20/2024"
+heroImage: "/blog-placeholder-3.jpg"
 ---
 
 1. Set Up NFS:
 
--   Install NFS server on the machine where the source HDD is located:
+- Install NFS server on the machine where the source HDD is located:
 
 ```shell
 sudo apt install nfs-kernel-server
 ```
 
--   Edit the /etc/exports file to specify directories to be exported:
+- Edit the /etc/exports file to specify directories to be exported:
 
 ```shell
 /path/to/source *(rw,sync,no_subtree_check)
 ```
 
--   Restart the NFS server:
+- Restart the NFS server:
 
 ```shell
 sudo systemctl restart nfs-kernel-server
 ```
 
--   On the machines with destination HDDs, install NFS client:
+- On the machines with destination HDDs, install NFS client:
 
 ```shell
 sudo apt install nfs-common
 ```
 
--   Mount the exported directory from the source machine to the destination machines:
+- Mount the exported directory from the source machine to the destination machines:
 
 ```shell
 sudo mount -t nfs source_machine:/path/to/source /mnt/destination
@@ -39,7 +39,7 @@ sudo mount -t nfs source_machine:/path/to/source /mnt/destination
 
 2. Sync Data Using Rsync:
 
--   Write a script to sync data bidirectionally between the mounted NFS directories on the destination machines.
+- Write a script to sync data bidirectionally between the mounted NFS directories on the destination machines.
 
 ```shell
 #!/bin/bash
@@ -51,13 +51,13 @@ rsync -avu --delete /mnt/destination /path/to/destination_on_hdd
 rsync -avu --delete /path/to/source_on_hdd /mnt/destination
 ```
 
--   Make the script executable:
+- Make the script executable:
 
 ```shell
 chmod +x sync_nfs_hdds.sh
 ```
 
--   Run the script periodically using cron or manually as needed.
+- Run the script periodically using cron or manually as needed.
 
 ## Examples
 

@@ -1,10 +1,10 @@
 ---
-import SocialLinks from './SocialLinks.astro'
+import SocialLinks from "./SocialLinks.astro";
 
-const today = new Date()
+const today = new Date();
 ---
 
-<footer class='flex w-full justify-center gap-8 bg-accent p-8'>
-	<span>&copy; {today.getFullYear()} Kevin. All rights reserved.</span>
-	<SocialLinks />
+<footer class="flex w-full items-center justify-center gap-8 bg-primary p-8">
+    <span>&copy; {today.getFullYear()} Kevin. All rights reserved.</span>
+    <SocialLinks isFooter />
 </footer>

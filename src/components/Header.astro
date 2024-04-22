@@ -1,16 +1,16 @@
 ---
-import HeaderLink from './HeaderLink.astro'
-import { SITE_TITLE } from '../consts'
-import SocialLinks from './SocialLinks.astro'
+import HeaderLink from "./HeaderLink.astro";
+import { SITE_TITLE } from "../consts";
+import SocialLinks from "./SocialLinks.astro";
 ---
 
-<header class='w-full bg-secondary p-8'>
-	<nav class='flex items-center justify-between gap-8'>
-		<h2><a href='/'>{SITE_TITLE}</a></h2>
-		<div>
-			<HeaderLink href='/'>Home</HeaderLink>
-			<HeaderLink href='/blog'>Blog</HeaderLink>
-		</div>
-		<SocialLinks />
-	</nav>
+<header class="w-full bg-secondary px-8 py-4">
+    <nav class="flex items-center justify-between gap-8">
+        <h2 class="text-xl font-bold tracking-wide text-primary"><a href="/">{SITE_TITLE}</a></h2>
+        <div class="flex items-center gap-2">
+            <HeaderLink href="/">Home</HeaderLink>
+            <HeaderLink href="/blog">Blog</HeaderLink>
+        </div>
+        <SocialLinks />
+    </nav>
 </header>

@@ -1,8 +1,8 @@
 ---
-title: 'The Power of Words:'
-description: 'How Your Coworkers Perceive Your Spouse'
-pubDate: '10/6/2023'
-heroImage: '/blog-placeholder-3.jpg'
+title: "The Power of Words:"
+description: "How Your Coworkers Perceive Your Spouse"
+pubDate: "10/6/2023"
+heroImage: "/blog-placeholder-3.jpg"
 ---
 
 In the intricate tapestry of our lives, the threads of our personal and professional worlds often intertwine, especially when it comes to relationships. Our coworkers, those familiar faces we see day in and day out, often gain insight into our personal lives through the stories we share. Surprisingly, the way we talk about our significant other can significantly influence how our coworkers perceive them. Our words act as a window into our relationships, shaping the image others have of our partners. Let’s delve into the subtle art of portraying our spouses positively and respectfully, and the impact it can have on our workplace dynamics.
