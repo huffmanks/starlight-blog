@@ -2,11 +2,12 @@
 import { Code } from "astro-expressive-code/components";
 
 interface Props {
+    title?: string;
     code: string;
     lang?: string;
 }
 
-const { code, lang = "shell" } = Astro.props;
+const { title, code, lang = "shell" } = Astro.props;
 ---
 
-<Code class="w-fit" code={code} lang={lang} showLineNumbers={false} frame="none" />
+<Code title={title} code={code} lang={lang} showLineNumbers={false} frame={title ? "auto" : "none"} />

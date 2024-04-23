@@ -61,13 +61,40 @@ body {
     sans-serif;
   background-color: hsl(var(--background));
   color: hsl(var(--foreground));
+
+  /* Pagefind */
+  --pagefind-ui-scale: 0.9;
+  --pagefind-ui-text: hsl(var(--foreground));
+  --pagefind-ui-background: hsl(var(--secondary));
+  --pagefind-ui-border: hsl(var(--muted-foreground));
+  --pagefind-ui-border-width: 1px;
+  --pagefind-ui-border-radius: var(--radius);
+  --pagefind-ui-image-border-radius: var(--radius);
+  --pagefind-ui-image-box-ratio: 3 / 2;
+  --pagefind-ui-font: "Inter", sans-serif;
 }
 
 * {
   border-color: hsl(var(--border));
 }
 
+.prose div.expressive-code {
+  margin-bottom: 50px;
+}
+
 .prose li:has(> div.expressive-code) {
   list-style-type: none;
   margin-left: -20px;
+}
+
+.prose li div.expressive-code {
+  margin-bottom: 75px;
+}
+
+.prose ol ol {
+  list-style-type: lower-alpha;
+}
+
+.prose ol ol ol {
+  list-style-type: lower-roman;
 }

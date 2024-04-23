@@ -11,7 +11,7 @@ export default {
       },
     },
     extend: {
-      typography: ({ theme }) => ({
+      typography: {
         DEFAULT: {
           css: {
             width: "100%",
@@ -20,7 +20,7 @@ export default {
             color: "hsl(var(--foreground))",
           },
         },
-      }),
+      },
       colors: {
         border: "hsl(var(--border))",
         input: "hsl(var(--input))",

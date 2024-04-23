@@ -4,11 +4,13 @@ import { getCollection } from "astro:content";
 
 import FormattedDate from "../../components/FormattedDate.astro";
 import BaseLayout from "../../layouts/BaseLayout.astro";
+import SearchField from "../../components/SearchField.astro";
 
 const posts = (await getCollection("blog")).sort((a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf());
 ---
 
 <BaseLayout title={SITE_TITLE} description={SITE_DESCRIPTION} heading="Posts">
+    <SearchField />
     <section>
         <div class="grid grid-cols-[repeat(auto-fill,_minmax(min(275px,_100%),_1fr))] gap-8">
             {
