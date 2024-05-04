@@ -1,0 +1,306 @@
+# PI Setup
+
+```sh
+ssh USER_NAME@IP_ADDRESS
+```
+
+## Security
+
+1. Keep system updated
+
+```sh
+sudo apt install unattended-upgrades
+```
+
+```sh
+sudo nano /etc/apt/apt.conf.d/02periodic
+```
+
+### Add this
+
+APT::Periodic::Enable "1";
+APT::Periodic::Update-Package-Lists "1";
+APT::Periodic::Download-Upgradeable-Packages "1";
+APT::Periodic::Unattended-Upgrade "1";
+APT::Periodic::AutocleanInterval "1";
+APT::Periodic::Verbose "2";
+
+```sh
+sudo unattended-upgrades -d
+```
+
+2. Make sudo require password
+
+```sh
+sudo nano /etc/sudoers.d/010_pi-nopasswd
+```
+
+### Find this line and change
+
+pi ALL=(ALL) NOPASSWD: ALL **Remove NO, "PASSWD: ALL"**
+
+3. SSH: prevent root login
+
+```sh
+sudo nano /etc/ssh/sshd_config
+```
+
+### Find this line and uncomment
+
+\#PermitRootLogin prohibit-password
+
+### Restart the SSH server if you changed anything in the configuration file:
+
+```sh
+sudo service ssh restart
+```
+
+4. SSH: change port
+
+```sh
+sudo nano /etc/ssh/sshd_config
+```
+
+### Change port on this line
+
+\#Port 22
+
+5. SSH: use keys instead of password
+
+### HOST: Create key
+
+```sh
+ssh-keygen -t rsa
+```
+
+### HOST: Copy key to Pi
+
+```sh
+scp ~/.ssh/id_rsa.pub pi@IP:/home/pi/your_key.pub
+```
+
+### PI: Add key to the allowed keys
+
+```sh
+cat /home/pi/your_key.pub >> ~/.ssh/authorized_keys
+```
+
+### PI: Edit config to disallow password
+
+```sh
+sudo nano /etc/ssh/sshd_config
+```
+
+PasswordAuthentication no
+
+6. Install fail2ban
+
+```sh
+sudo apt install fail2ban
+```
+
+### Optional update config
+
+```sh
+sudo nano /etc/fail2ban/jail.conf
+```
+
+### Restart the service if you change anything
+
+```sh
+sudo service fail2ban restart
+```
+
+7. Install firewall
+
+```sh
+sudo apt install ufw
+```
+
+### Example limit access to port by ip
+
+```sh
+sudo ufw allow from IP_ADDRESS port PORT_NUMBER
+```
+
+```sh
+sudo ufw enable
+```
+
+## Docker
+
+```sh
+sudo apt install ca-certificates curl
+```
+
+```sh
+sudo install -m 0755 -d /etc/apt/keyrings
+```
+
+```sh
+sudo curl -fsSL https://download.docker.com/linux/debian/gpg -o /etc/apt/keyrings/docker.asc
+```
+
+```sh
+sudo chmod a+r /etc/apt/keyrings/docker.asc
+```
+
+```sh
+echo \
+  "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.asc] https://download.docker.com/linux/debian \
+  $(. /etc/os-release && echo "$VERSION_CODENAME") stable" | \
+  sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
+```
+
+```sh
+sudo apt update
+```
+
+```sh
+for pkg in docker.io docker-doc docker-compose podman-docker containerd runc; do sudo apt-get remove $pkg; done
+```
+
+```sh
+sudo apt install docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin
+```
+
+```sh
+sudo groupadd docker
+```
+
+```sh
+sudo usermod -aG docker $USER
+```
+
+```sh
+sudo systemctl enable docker
+```
+
+```sh
+sudo systemctl start docker
+```
+
+## Portainer
+
+```sh
+sudo docker pull portainer/portainer-ce:latest
+```
+
+### Start portainer
+
+```sh
+sudo docker run -d -p 9000:9000 --name=portainer --restart=always -v /var/run/docker.sock:/var/run/docker.sock -v portainer_data:/data portainer/portainer-ce:latest
+```
+
+### Access web UI
+
+http://PI_IP_ADDRESS:9000
+OR
+DOMAIN.local:9000 (i.e. raspberry.local:9000)
+
+```yml
+version: "2.1"
+
+services:
+  nextcloud:
+    image: lscr.io/linuxserver/nextcloud
+    container_name: nextcloud
+    environment:
+      - PUID=1000
+      - PGID=1000
+      - TZ=America/New_York
+    volumes:
+      - /mnt/flex/appdata/nextcloud/config:/config
+      - /mnt/flex/appdata/nextcloud/data:/data
+    depends_on:
+      - mariadb
+    restart: unless-stopped
+  mariadb:
+    image: lscr.io/linuxserver/mariadb
+    container_name: mariadb
+    environment:
+      - PUID=1000
+      - PGID=1000
+      - TZ=America/New_York
+      - MYSQL_DATABASE=nextcloud
+      - MYSQL_ROOT_PASSWORD=stack.env.MYSQL_ROOT_PASSWORD
+      - MYSQL_USER=stack.env.MYSQL_USER
+      - MYSQL_PASSWORD=stack.env.MYSQL_PASSWORD
+    volumes:
+      - /mnt/flex/appdata/mariadb:/config
+    restart: unless-stopped
+  swag:
+    image: lscr.io/linuxserver/swag
+    container_name: swag
+    cap_add:
+      - NET_ADMIN
+    environment:
+      - PUID=1000
+      - PGID=1000
+      - TZ=America/New_York
+      - URL=stack.env.DOMAIN_URL
+      - SUBDOMAINS=wildcard
+      - VALIDATION=dns
+      - DNSPLUGIN=cloudflare
+    volumes:
+      - /mnt/flex/appdata/swag:/config
+    ports:
+      - 443:443
+      - 80:80
+    restart: unless-stopped
+```
+
+```sh
+MYSQL_ROOT_PASSWORD=
+MYSQL_USER=
+MYSQL_PASSWORD=
+DOMAIN_URL=
+```
+
+## Mount external HDD
+
+### Check where it is mounted
+
+```sh
+lsblk
+```
+
+### Get UUID
+
+```sh
+sudo blkid /dev/sda1
+```
+
+### Create mount location
+
+```sh
+sudo mkdir -p /mnt/flex
+```
+
+### Change ownership
+
+```sh
+sudo chown -R user:group /mnt/flex
+```
+
+### Modify fstab
+
+```sh
+sudo nano /etc/fstab
+```
+
+### Replace current
+
+UUID=UUID /mnt/flex ext4 auto,users,rw,nofail,noatime 0 0
+
+### Unmount drive
+
+```sh
+sudo umount /dev/sda1
+```
+
+### Reboot
+
+```sh
+sudo reboot
+```
