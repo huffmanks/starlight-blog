@@ -1,7 +1,214 @@
-# PI Setup
+---
+title: "Pi Setup"
+description: "Setting up a pi with security, docker and more"
+pubDate: "5/4/2024"
+heroImage: "/blog-placeholder-3.jpg"
+---
 
 ```sh
 ssh USER_NAME@IP_ADDRESS
+```
+
+## Update and reboot
+
+```sh
+sudo apt update && sudo apt upgrade
+```
+
+```sh
+sudo reboot
+```
+
+## Mount external HDD
+
+### Check where it is mounted
+
+```sh
+lsblk
+```
+
+### Get UUID
+
+```sh
+sudo blkid /dev/sda1
+```
+
+### Create mount location
+
+```sh
+sudo mkdir -p /mnt/flex
+```
+
+### Change ownership
+
+```sh
+sudo chown -R user:group /mnt/flex
+```
+
+### Modify fstab
+
+```sh
+sudo nano /etc/fstab
+```
+
+### Replace current
+
+```sh
+UUID=22d23d78-272d-4d51-9168-3ac30bfb6353  /mnt/flex       ext4            auto,nofail,noatime,rw,users  0    2
+```
+
+### Unmount drive
+
+```sh
+sudo umount /dev/sda1
+```
+
+### Reboot
+
+```sh
+sudo reboot
+```
+
+## Docker
+
+```sh
+sudo apt install ca-certificates curl
+```
+
+```sh
+sudo install -m 0755 -d /etc/apt/keyrings
+```
+
+```sh
+sudo curl -fsSL https://download.docker.com/linux/debian/gpg -o /etc/apt/keyrings/docker.asc
+```
+
+```sh
+sudo chmod a+r /etc/apt/keyrings/docker.asc
+```
+
+```sh
+echo \
+  "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.asc] https://download.docker.com/linux/debian \
+  bookworm stable" | \
+  sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
+```
+
+```sh
+sudo apt update
+```
+
+```sh
+sudo apt remove docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin
+```
+
+```sh
+sudo apt purge docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin
+```
+
+```sh
+sudo rm -rf /var/lib/docker && sudo rm -rf /var/lib/containerd
+```
+
+```sh
+sudo apt install docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin
+```
+
+```sh
+sudo groupadd docker
+```
+
+```sh
+sudo usermod -aG docker $USER
+```
+
+```sh
+sudo systemctl enable docker
+```
+
+```sh
+sudo systemctl start docker
+```
+
+## Portainer
+
+```sh
+docker pull portainer/portainer-ce:linux-arm64-2.0.0
+```
+
+```sh
+docker volume create --opt device=/mnt/flex portainer_data
+```
+
+### Start portainer
+
+```sh
+docker run -d -p 9000:9000 --name=portainer --restart=always -v /var/run/docker.sock:/var/run/docker.sock -v portainer_data:/data portainer/portainer-ce:linux-arm64-2.0.0
+```
+
+### Access web UI
+
+http://PI_IP_ADDRESS:9000
+OR
+DOMAIN.local:9000 (i.e. raspberry.local:9000)
+
+```yml
+version: "2.1"
+
+services:
+  nextcloud:
+    image: lscr.io/linuxserver/nextcloud
+    container_name: nextcloud
+    environment:
+      - PUID=1000
+      - PGID=1000
+      - TZ=America/New_York
+    volumes:
+      - /mnt/flex/appdata/nextcloud/config:/config
+      - /mnt/flex/appdata/nextcloud/data:/data
+    depends_on:
+      - mariadb
+    restart: unless-stopped
+  mariadb:
+    image: lscr.io/linuxserver/mariadb
+    container_name: mariadb
+    environment:
+      - PUID=1000
+      - PGID=1000
+      - TZ=America/New_York
+      - MYSQL_DATABASE=nextcloud
+      - MYSQL_ROOT_PASSWORD={{ MYSQL_ROOT_PASSWORD }}
+      - MYSQL_USER={{ MYSQL_USER }}
+      - MYSQL_PASSWORD={{ MYSQL_PASSWORD }}
+    volumes:
+      - /mnt/flex/appdata/mariadb:/config
+    restart: unless-stopped
+  swag:
+    image: lscr.io/linuxserver/swag
+    container_name: swag
+    cap_add:
+      - NET_ADMIN
+    environment:
+      - PUID=1000
+      - PGID=1000
+      - TZ=America/New_York
+      - URL={{ DOMAIN_URL }}
+      - SUBDOMAINS=next
+      - VALIDATION=dns
+      - DNSPLUGIN=cloudflare
+    volumes:
+      - /mnt/flex/appdata/swag:/config
+    ports:
+      - 443:443
+      - 80:80
+    restart: unless-stopped
+```
+
+```sh
+MYSQL_ROOT_PASSWORD=
+MYSQL_USER=
+MYSQL_PASSWORD=
+DOMAIN_URL=
 ```
 
 ## Security
@@ -18,12 +225,14 @@ sudo nano /etc/apt/apt.conf.d/02periodic
 
 ### Add this
 
+```sh
 APT::Periodic::Enable "1";
 APT::Periodic::Update-Package-Lists "1";
 APT::Periodic::Download-Upgradeable-Packages "1";
 APT::Periodic::Unattended-Upgrade "1";
 APT::Periodic::AutocleanInterval "1";
 APT::Periodic::Verbose "2";
+```
 
 ```sh
 sudo unattended-upgrades -d
@@ -37,7 +246,7 @@ sudo nano /etc/sudoers.d/010_pi-nopasswd
 
 ### Find this line and change
 
-pi ALL=(ALL) NOPASSWD: ALL **Remove NO, "PASSWD: ALL"**
+pi ALL=(ALL) NOPASSWD: ALL => Remove NO, "PASSWD: ALL"
 
 3. SSH: prevent root login
 
@@ -125,182 +334,4 @@ sudo ufw allow from IP_ADDRESS port PORT_NUMBER
 
 ```sh
 sudo ufw enable
-```
-
-## Docker
-
-```sh
-sudo apt install ca-certificates curl
-```
-
-```sh
-sudo install -m 0755 -d /etc/apt/keyrings
-```
-
-```sh
-sudo curl -fsSL https://download.docker.com/linux/debian/gpg -o /etc/apt/keyrings/docker.asc
-```
-
-```sh
-sudo chmod a+r /etc/apt/keyrings/docker.asc
-```
-
-```sh
-echo \
-  "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.asc] https://download.docker.com/linux/debian \
-  $(. /etc/os-release && echo "$VERSION_CODENAME") stable" | \
-  sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
-```
-
-```sh
-sudo apt update
-```
-
-```sh
-for pkg in docker.io docker-doc docker-compose podman-docker containerd runc; do sudo apt-get remove $pkg; done
-```
-
-```sh
-sudo apt install docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin
-```
-
-```sh
-sudo groupadd docker
-```
-
-```sh
-sudo usermod -aG docker $USER
-```
-
-```sh
-sudo systemctl enable docker
-```
-
-```sh
-sudo systemctl start docker
-```
-
-## Portainer
-
-```sh
-sudo docker pull portainer/portainer-ce:latest
-```
-
-### Start portainer
-
-```sh
-sudo docker run -d -p 9000:9000 --name=portainer --restart=always -v /var/run/docker.sock:/var/run/docker.sock -v portainer_data:/data portainer/portainer-ce:latest
-```
-
-### Access web UI
-
-http://PI_IP_ADDRESS:9000
-OR
-DOMAIN.local:9000 (i.e. raspberry.local:9000)
-
-```yml
-version: "2.1"
-
-services:
-  nextcloud:
-    image: lscr.io/linuxserver/nextcloud
-    container_name: nextcloud
-    environment:
-      - PUID=1000
-      - PGID=1000
-      - TZ=America/New_York
-    volumes:
-      - /mnt/flex/appdata/nextcloud/config:/config
-      - /mnt/flex/appdata/nextcloud/data:/data
-    depends_on:
-      - mariadb
-    restart: unless-stopped
-  mariadb:
-    image: lscr.io/linuxserver/mariadb
-    container_name: mariadb
-    environment:
-      - PUID=1000
-      - PGID=1000
-      - TZ=America/New_York
-      - MYSQL_DATABASE=nextcloud
-      - MYSQL_ROOT_PASSWORD=stack.env.MYSQL_ROOT_PASSWORD
-      - MYSQL_USER=stack.env.MYSQL_USER
-      - MYSQL_PASSWORD=stack.env.MYSQL_PASSWORD
-    volumes:
-      - /mnt/flex/appdata/mariadb:/config
-    restart: unless-stopped
-  swag:
-    image: lscr.io/linuxserver/swag
-    container_name: swag
-    cap_add:
-      - NET_ADMIN
-    environment:
-      - PUID=1000
-      - PGID=1000
-      - TZ=America/New_York
-      - URL=stack.env.DOMAIN_URL
-      - SUBDOMAINS=wildcard
-      - VALIDATION=dns
-      - DNSPLUGIN=cloudflare
-    volumes:
-      - /mnt/flex/appdata/swag:/config
-    ports:
-      - 443:443
-      - 80:80
-    restart: unless-stopped
-```
-
-```sh
-MYSQL_ROOT_PASSWORD=
-MYSQL_USER=
-MYSQL_PASSWORD=
-DOMAIN_URL=
-```
-
-## Mount external HDD
-
-### Check where it is mounted
-
-```sh
-lsblk
-```
-
-### Get UUID
-
-```sh
-sudo blkid /dev/sda1
-```
-
-### Create mount location
-
-```sh
-sudo mkdir -p /mnt/flex
-```
-
-### Change ownership
-
-```sh
-sudo chown -R user:group /mnt/flex
-```
-
-### Modify fstab
-
-```sh
-sudo nano /etc/fstab
-```
-
-### Replace current
-
-UUID=UUID /mnt/flex ext4 auto,users,rw,nofail,noatime 0 0
-
-### Unmount drive
-
-```sh
-sudo umount /dev/sda1
-```
-
-### Reboot
-
-```sh
-sudo reboot
 ```
