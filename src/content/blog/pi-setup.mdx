@@ -42,7 +42,11 @@ sudo mkdir -p /mnt/flex
 ### Change ownership
 
 ```sh
-sudo chown -R user:group /mnt/flex
+sudo chown -R $USER:$USER /mnt/flex
+```
+
+```sh
+sudo chmod -R 755 /mnt/flex
 ```
 
 ### Modify fstab
@@ -54,7 +58,7 @@ sudo nano /etc/fstab
 ### Replace current
 
 ```sh
-UUID=22d23d78-272d-4d51-9168-3ac30bfb6353  /mnt/flex       ext4            auto,nofail,noatime,rw,users  0    2
+UUID=22d23d78-272d-4d51-9168-3ac30bfb6353  /mnt/flex       ext4            auto,nofail,noatime,rw,users  0    0
 ```
 
 ### Unmount drive
@@ -90,7 +94,7 @@ sudo chmod a+r /etc/apt/keyrings/docker.asc
 ```sh
 echo \
   "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.asc] https://download.docker.com/linux/debian \
-  bookworm stable" | \
+  $(. /etc/os-release && echo "$VERSION_CODENAME") stable" | \
   sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
 ```
 
@@ -123,11 +127,70 @@ sudo usermod -aG docker $USER
 ```
 
 ```sh
-sudo systemctl enable docker
+sudo reboot
 ```
 
 ```sh
-sudo systemctl start docker
+mkdir next-cloud-config
+```
+
+```sh
+cd next-cloud-config && sudo nano .env
+```
+
+```sh
+MYSQL_HOST=
+MYSQL_DATABASE=
+MYSQL_ROOT_PASSWORD=
+MYSQL_USER=
+MYSQL_PASSWORD=
+```
+
+```sh
+sudo nano docker-compose.yml
+```
+
+```yml
+services:
+  nextcloud:
+    image: lscr.io/linuxserver/nextcloud
+    container_name: nextcloud
+    environment:
+      - PUID=1000
+      - PGID=1000
+      - TZ=America/New_York
+      - MYSQL_HOST=${MYSQL_HOST}
+      - MYSQL_DATABASE=${MYSQL_DATABASE}
+      - MYSQL_ROOT_PASSWORD=${MYSQL_ROOT_PASSWORD}
+      - MYSQL_USER=${MYSQL_USER}
+      - MYSQL_PASSWORD=${MYSQL_PASSWORD}
+    volumes:
+      - /mnt/flex/appdata/nextcloud/config:/config
+      - /mnt/flex/appdata/nextcloud/data:/data
+    ports:
+      - 8080:80
+    depends_on:
+      - mariadb
+    restart: unless-stopped
+  mariadb:
+    image: lscr.io/linuxserver/mariadb
+    container_name: mariadb
+    environment:
+      - PUID=1000
+      - PGID=1000
+      - TZ=America/New_York
+      - MYSQL_HOST=${MYSQL_HOST}
+      - MYSQL_DATABASE=${MYSQL_DATABASE}
+      - MYSQL_ROOT_PASSWORD=${MYSQL_ROOT_PASSWORD}
+      - MYSQL_USER=${MYSQL_USER}
+      - MYSQL_PASSWORD=${MYSQL_PASSWORD}
+    volumes:
+      - /mnt/flex/appdata/mariadb:/config
+    restart: unless-stopped
+```
+
+```sh
+docker compose up -d
 ```
 
 ## Portainer
@@ -149,67 +212,6 @@ docker run -d -p 9000:9000 --name=portainer --restart=always -v /var/run/docker.
 ### Access web UI
 
 http://PI_IP_ADDRESS:9000
-OR
-DOMAIN.local:9000 (i.e. raspberry.local:9000)
-
-```yml
-version: "2.1"
-
-services:
-  nextcloud:
-    image: lscr.io/linuxserver/nextcloud
-    container_name: nextcloud
-    environment:
-      - PUID=1000
-      - PGID=1000
-      - TZ=America/New_York
-    volumes:
-      - /mnt/flex/appdata/nextcloud/config:/config
-      - /mnt/flex/appdata/nextcloud/data:/data
-    depends_on:
-      - mariadb
-    restart: unless-stopped
-  mariadb:
-    image: lscr.io/linuxserver/mariadb
-    container_name: mariadb
-    environment:
-      - PUID=1000
-      - PGID=1000
-      - TZ=America/New_York
-      - MYSQL_DATABASE=nextcloud
-      - MYSQL_ROOT_PASSWORD={{ MYSQL_ROOT_PASSWORD }}
-      - MYSQL_USER={{ MYSQL_USER }}
-      - MYSQL_PASSWORD={{ MYSQL_PASSWORD }}
-    volumes:
-      - /mnt/flex/appdata/mariadb:/config
-    restart: unless-stopped
-  swag:
-    image: lscr.io/linuxserver/swag
-    container_name: swag
-    cap_add:
-      - NET_ADMIN
-    environment:
-      - PUID=1000
-      - PGID=1000
-      - TZ=America/New_York
-      - URL={{ DOMAIN_URL }}
-      - SUBDOMAINS=next
-      - VALIDATION=dns
-      - DNSPLUGIN=cloudflare
-    volumes:
-      - /mnt/flex/appdata/swag:/config
-    ports:
-      - 443:443
-      - 80:80
-    restart: unless-stopped
-```
-
-```sh
-MYSQL_ROOT_PASSWORD=
-MYSQL_USER=
-MYSQL_PASSWORD=
-DOMAIN_URL=
-```
 
 ## Security
 
