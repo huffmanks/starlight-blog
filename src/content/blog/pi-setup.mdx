@@ -144,8 +144,6 @@ MYSQL_DATABASE=
 MYSQL_ROOT_PASSWORD=
 MYSQL_USER=
 MYSQL_PASSWORD=
-URL=
-DUCKDNSTOKEN=
 ```
 
 ```sh
@@ -161,12 +159,15 @@ services:
       - PUID=1000
       - PGID=1000
       - TZ=America/New_York
+      - MYSQL_HOST=${MYSQL_HOST}
+      - MYSQL_DATABASE=${MYSQL_DATABASE}
+      - MYSQL_USER=${MYSQL_USER}
+      - MYSQL_PASSWORD=${MYSQL_PASSWORD}
     volumes:
       - /mnt/flex/appdata/nextcloud/config:/config
       - /mnt/flex/appdata/nextcloud/data:/data
     ports:
-      - 9443:443
-      - 8080:80
+      - 9000:80
     depends_on:
       - mariadb
     restart: unless-stopped
@@ -185,26 +186,20 @@ services:
     volumes:
       - /mnt/flex/appdata/mariadb:/config
     restart: unless-stopped
-  swag:
-    image: lscr.io/linuxserver/swag
-    container_name: swag
-    cap_add:
-      - NET_ADMIN
-    environment:
-      - PUID=1000
-      - PGID=1000
-      - TZ=America/New_York
-      - URL=${URL}
-      - SUBDOMAINS=wildcard
-      - VALIDATION=duckdns
-      - DUCKDNSTOKEN=${DUCKDNSTOKEN}
+  nginx:
+    image: "jc21/nginx-proxy-manager:latest"
+    container_name: nginx
     volumes:
-      - /mnt/flex/appdata/swag:/config
+      - /mnt/flex/appdata/nginx/data:/data
+      - /mnt/flex/appdata/nginx/letsencrypt:/etc/letsencrypt
     ports:
       - 443:443
       - 80:80
+      - 81:81
     restart: unless-stopped
 ```
+
+[Cloudflare tunnel](https://developers.cloudflare.com/cloudflare-one/connections/connect-networks/get-started/create-local-tunnel)
 
 ```sh
 docker compose up -d
