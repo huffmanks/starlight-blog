@@ -144,6 +144,8 @@ MYSQL_DATABASE=
 MYSQL_ROOT_PASSWORD=
 MYSQL_USER=
 MYSQL_PASSWORD=
+URL=
+DUCKDNSTOKEN=
 ```
 
 ```sh
@@ -159,15 +161,11 @@ services:
       - PUID=1000
       - PGID=1000
       - TZ=America/New_York
-      - MYSQL_HOST=${MYSQL_HOST}
-      - MYSQL_DATABASE=${MYSQL_DATABASE}
-      - MYSQL_ROOT_PASSWORD=${MYSQL_ROOT_PASSWORD}
-      - MYSQL_USER=${MYSQL_USER}
-      - MYSQL_PASSWORD=${MYSQL_PASSWORD}
     volumes:
       - /mnt/flex/appdata/nextcloud/config:/config
       - /mnt/flex/appdata/nextcloud/data:/data
     ports:
+      - 9443:443
       - 8080:80
     depends_on:
       - mariadb
@@ -186,6 +184,25 @@ services:
       - MYSQL_PASSWORD=${MYSQL_PASSWORD}
     volumes:
       - /mnt/flex/appdata/mariadb:/config
+    restart: unless-stopped
+  swag:
+    image: lscr.io/linuxserver/swag
+    container_name: swag
+    cap_add:
+      - NET_ADMIN
+    environment:
+      - PUID=1000
+      - PGID=1000
+      - TZ=America/New_York
+      - URL=${URL}
+      - SUBDOMAINS=wildcard
+      - VALIDATION=duckdns
+      - DUCKDNSTOKEN=${DUCKDNSTOKEN}
+    volumes:
+      - /mnt/flex/appdata/swag:/config
+    ports:
+      - 443:443
+      - 80:80
     restart: unless-stopped
 ```
 
@@ -284,16 +301,16 @@ sudo nano /etc/ssh/sshd_config
 ssh-keygen -t rsa
 ```
 
-### HOST: Copy key to Pi
+### HOST: Copy public key to Pi
 
 ```sh
-scp ~/.ssh/id_rsa.pub pi@IP:/home/pi/your_key.pub
+scp ~/.ssh/id_rsa.pub USER_NAME@DEVICE_IP:~/.ssh/id_rsa.pub
 ```
 
 ### PI: Add key to the allowed keys
 
 ```sh
-cat /home/pi/your_key.pub >> ~/.ssh/authorized_keys
+cat ~/.ssh/id_rsa.pub >> ~/.ssh/authorized_keys
 ```
 
 ### PI: Edit config to disallow password
