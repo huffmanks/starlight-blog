@@ -199,6 +199,18 @@ services:
     restart: unless-stopped
 ```
 
+```sh
+sudo chown -R www-data:www-data /mnt/flex/nextcloud
+```
+
+```sh
+sudo find /mnt/flex/nextcloud/ -type d -exec chmod 750 {} \;
+```
+
+```sh
+sudo find /mnt/flex/nextcloud/ -type f -exec chmod 640 {} \;
+```
+
 [Cloudflare tunnel](https://developers.cloudflare.com/cloudflare-one/connections/connect-networks/get-started/create-local-tunnel)
 
 ```sh
