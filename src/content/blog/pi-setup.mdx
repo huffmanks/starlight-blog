@@ -41,12 +41,15 @@ sudo mkdir -p /mnt/flex
 
 ### Change ownership
 
-```sh
 sudo chown -R $USER:$USER /mnt/flex
+sudo chmod -R 755 /mnt/flex
+
+```sh
+sudo chown -R 33:0 /mnt/flex
 ```
 
 ```sh
-sudo chmod -R 755 /mnt/flex
+sudo chmod -R 750 /mnt/flex
 ```
 
 ### Modify fstab
