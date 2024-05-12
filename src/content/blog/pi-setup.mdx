@@ -134,11 +134,11 @@ sudo reboot
 ```
 
 ```sh
-mkdir next-cloud-config
+git clone https://github.com/huffmanks/ncpi.git
 ```
 
 ```sh
-cd next-cloud-config && sudo nano .env
+cd ncpi && chmod +x recreate_folders.sh && sudo nano .env
 ```
 
 ```sh
@@ -150,95 +150,67 @@ MYSQL_PASSWORD=
 ```
 
 ```sh
-sudo nano docker-compose.yml
+docker compose up -d
 ```
 
-```yml
-services:
-  nextcloud:
-    image: lscr.io/linuxserver/nextcloud
-    container_name: nextcloud
-    environment:
-      - PUID=1000
-      - PGID=1000
-      - TZ=America/New_York
-      - MYSQL_HOST=${MYSQL_HOST}
-      - MYSQL_DATABASE=${MYSQL_DATABASE}
-      - MYSQL_USER=${MYSQL_USER}
-      - MYSQL_PASSWORD=${MYSQL_PASSWORD}
-    volumes:
-      - /mnt/flex/appdata/nextcloud/config:/config
-      - /mnt/flex/appdata/nextcloud/data:/data
-    ports:
-      - 9000:80
-    depends_on:
-      - mariadb
-    restart: unless-stopped
-  mariadb:
-    image: lscr.io/linuxserver/mariadb
-    container_name: mariadb
-    environment:
-      - PUID=1000
-      - PGID=1000
-      - TZ=America/New_York
-      - MYSQL_HOST=${MYSQL_HOST}
-      - MYSQL_DATABASE=${MYSQL_DATABASE}
-      - MYSQL_ROOT_PASSWORD=${MYSQL_ROOT_PASSWORD}
-      - MYSQL_USER=${MYSQL_USER}
-      - MYSQL_PASSWORD=${MYSQL_PASSWORD}
-    volumes:
-      - /mnt/flex/appdata/mariadb:/config
-    restart: unless-stopped
-  nginx:
-    image: "jc21/nginx-proxy-manager:latest"
-    container_name: nginx
-    volumes:
-      - /mnt/flex/appdata/nginx/data:/data
-      - /mnt/flex/appdata/nginx/letsencrypt:/etc/letsencrypt
-    ports:
-      - 443:443
-      - 80:80
-      - 81:81
-    restart: unless-stopped
-```
+### Nginx Proxy Manager
 
 ```sh
-sudo chown -R www-data:www-data /mnt/flex/nextcloud
-```
-
-```sh
-sudo find /mnt/flex/nextcloud/ -type d -exec chmod 750 {} \;
-```
-
-```sh
-sudo find /mnt/flex/nextcloud/ -type f -exec chmod 640 {} \;
+add host
 ```
 
 [Cloudflare tunnel](https://developers.cloudflare.com/cloudflare-one/connections/connect-networks/get-started/create-local-tunnel)
 
 ```sh
-docker compose up -d
-```
-
-## Portainer
-
-```sh
-docker pull portainer/portainer-ce:linux-arm64-2.0.0
+sudo mkdir -p --mode=0755 /usr/share/keyrings &&
+curl -fsSL https://pkg.cloudflare.com/cloudflare-main.gpg | sudo tee /usr/share/keyrings/cloudflare-main.gpg >/dev/null
 ```
 
 ```sh
-docker volume create --opt device=/mnt/flex portainer_data
+echo "deb [signed-by=/usr/share/keyrings/cloudflare-main.gpg] https://pkg.cloudflare.com/cloudflared $(lsb_release -cs) main" | sudo tee /etc/apt/sources.list.d/cloudflared.list
 ```
-
-### Start portainer
 
 ```sh
-docker run -d -p 9000:9000 --name=portainer --restart=always -v /var/run/docker.sock:/var/run/docker.sock -v portainer_data:/data portainer/portainer-ce:linux-arm64-2.0.0
+sudo apt update && sudo apt install cloudflared
 ```
 
-### Access web UI
+```sh
+cloudflared tunnel login
+```
 
-http://PI_IP_ADDRESS:9000
+```sh
+cloudflared tunnel create cloud
+```
+
+```sh
+# copy <Tunnel-UUID>
+
+cloudflared tunnel list
+```
+
+```sh
+sudo nano ~/.cloudflared/config.yml
+```
+
+```yml
+# ~/.cloudflared/config.yml
+
+url: https://next.local:9000
+tunnel: <Tunnel-UUID>
+credentials-file: ./.cloudflared/<Tunnel-UUID>.json
+```
+
+```sh
+cloudflared tunnel route dns cloud cloud.huffmanks.com
+```
+
+```sh
+cloudflared tunnel run cloud
+```
+
+### Optional add as a service
+
+[Cloudflared service](https://developers.cloudflare.com/cloudflare-one/connections/connect-networks/configure-tunnels/local-management/as-a-service/linux/)
 
 ## Security
 
