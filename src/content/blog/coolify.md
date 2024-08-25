@@ -346,3 +346,32 @@ docker compose --env-file /mnt/flex/coolify/source/.env \
 ### Login to web UI
 
 [IP_ADDRESS:8000](IP_ADDRESS:8000)
+
+## Setup minio
+
+1. Create access key
+2. Download minio client
+
+```sh
+curl https://dl.min.io/client/mc/release/linux-arm64/mc \
+  --create-dirs \
+  -o ~/minio-binaries/mc
+```
+
+````sh
+chmod +x $HOME/minio-binaries/mc
+```sh
+export PATH=$PATH:$HOME/minio-binaries/
+````
+
+### Create alias
+
+```sh
+mc alias set <ALIAS_NAME> <MINIO_SERVER_URL> <ACCESS_KEY> <SECRET_KEY>
+```
+
+### Add file to buckt
+
+```sh
+mc cp <LOCAL_FILE> <ALIAS_NAME>/<BUCKET_NAME>
+```
