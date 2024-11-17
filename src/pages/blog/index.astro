@@ -10,22 +10,22 @@ const posts = (await getCollection("blog")).sort((a, b) => b.data.pubDate.valueO
 ---
 
 <BaseLayout title={SITE_TITLE} description={SITE_DESCRIPTION} heading="Posts">
-    <SearchField />
-    <section>
-        <div class="grid grid-cols-[repeat(auto-fill,_minmax(min(275px,_100%),_1fr))] gap-8">
-            {
-                posts.map((post) => (
-                    <article>
-                        <a href={`/blog/${post.slug}/`}>
-                            <img class="object-cover" width={300} height={150} src={post.data.heroImage} alt="" />
-                            <h3 class="truncate">{post.data.title}</h3>
-                            <p class="text-sm text-muted-foreground">
-                                <FormattedDate date={post.data.pubDate} />
-                            </p>
-                        </a>
-                    </article>
-                ))
-            }
-        </div>
-    </section>
+  <SearchField />
+  <section>
+    <div class="grid grid-cols-[repeat(auto-fill,_minmax(min(275px,_100%),_1fr))] gap-8">
+      {
+        posts.map((post) => (
+          <article>
+            <a href={`/blog/${post.slug}/`}>
+              <img class="object-cover" width={300} height={150} src={post.data.heroImage} alt="" />
+              <h3 class="truncate">{post.data.title}</h3>
+              <p class="text-sm text-muted-foreground">
+                <FormattedDate date={post.data.pubDate} />
+              </p>
+            </a>
+          </article>
+        ))
+      }
+    </div>
+  </section>
 </BaseLayout>
